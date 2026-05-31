@@ -4,6 +4,12 @@ AI-powered personal finance intelligence platform built with `Next.js`, `Firebas
 
 FinSight AI helps users track expenses, manage monthly budgets, visualize spending behavior, and receive AI-generated forecasts, alerts, and conversational financial guidance through the FIA copilot workspace.
 
+
+
+*Live Website:** https://finsight-ai-771q.vercel.app
+
+
+
 ## Table of Contents
 
 - [Overview](#overview)
