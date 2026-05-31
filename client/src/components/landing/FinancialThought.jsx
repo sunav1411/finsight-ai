@@ -57,7 +57,7 @@ export default function FinancialThought() {
           md:text-[28px]
         "
       >
-        "{thoughts[currentThought]}"
+        &ldquo;{thoughts[currentThought]}&rdquo;
       </p>
     </div>
   );

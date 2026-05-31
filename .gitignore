@@ -1,37 +1,76 @@
-# dependencies
-/node_modules
+# Dependencies
+node_modules/
+client/node_modules/
+jspm_packages/
+bower_components/
+web_modules/
 
-# next.js
-/.next
-/out
+# Next.js and frontend build output
+.next/
+out/
+dist/
+.build/
+.turbo/
+client/.next/
+client/out/
+client/.build/
 
-# production
-/build
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
 
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Logs and reports
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+report.*.json
 
-# env files
+# Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Environment files
 .env
-.env.local
-.env.production.local
+.env.*
+!.env.example
+client/.env.local
+ai-engine/.env
 
-# vercel
-.vercel
+# Caches
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.npm/
+.pnpm-store/
 
-# local publishing leftovers
-/src-unpacked/
-/kharchology-src.zip
-/client/node_modules/
-/client/.next/
-/client/.build/
-/client/.env.local
-/ai-engine/.env
-/finsight-ai.git/
-/.finsightrepo/
+# Platform and editor files
+.DS_Store
+Thumbs.db
+*.pem
+.vscode-test/
+.idea/
+
+# Firebase and deployment
+.firebase/
+.vercel/
+.serverless/
+
+# Local project artifacts
+src-unpacked/
+kharchology-src.zip
+finsight-ai.git/
+.finsightrepo/

@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useState,
-} from "react";
-
+import { useState } from "react";
 import { X } from "lucide-react";
 
 const categories = [
@@ -24,60 +20,57 @@ export default function AddExpenseModal({
   editingExpense,
   onUpdateExpense,
 }) {
+  if (!open) return null;
 
-  // FORM STATE
+  return (
+    <ExpenseModalContent
+      key={editingExpense?.id || "new"}
+      onClose={onClose}
+      onAddExpense={onAddExpense}
+      editingExpense={editingExpense}
+      onUpdateExpense={onUpdateExpense}
+    />
+  );
+}
+
+function ExpenseModalContent({
+  onClose,
+  onAddExpense,
+  editingExpense,
+  onUpdateExpense,
+}) {
+  const initialState =
+    getInitialExpenseState(
+      editingExpense
+    );
+
   const [title, setTitle] =
-    useState("");
+    useState(initialState.title);
 
   const [amount, setAmount] =
-    useState("");
+    useState(initialState.amount);
 
   const [category, setCategory] =
-    useState("Food");
+    useState(initialState.category);
 
   const [date, setDate] =
-    useState("");
+    useState(initialState.date);
 
-  // PREFILL EDIT MODE
-  useEffect(() => {
-
-    if (editingExpense) {
-      setTitle(
-        editingExpense.title
-      );
-
-      setAmount(
-        editingExpense.amount
-      );
-
-      setCategory(
-        editingExpense.category
-      );
-
-      setDate(
-        editingExpense.date
-      );
-    } else {
-      resetForm();
-    }
-
-  }, [editingExpense, open]);
-
-  // RESET FORM
   function resetForm() {
-    setTitle("");
-    setAmount("");
-    setCategory("Food");
-    setDate("");
+    const nextState =
+      getInitialExpenseState();
+
+    setTitle(nextState.title);
+    setAmount(nextState.amount);
+    setCategory(nextState.category);
+    setDate(nextState.date);
   }
 
-  // CLOSE MODAL
   function handleClose() {
     resetForm();
     onClose();
   }
 
-  // SUBMIT
   function handleSubmit(e) {
     e.preventDefault();
 
@@ -85,20 +78,17 @@ export default function AddExpenseModal({
       !title ||
       !amount ||
       !date
-    )
+    ) {
       return;
+    }
 
-const expenseData = {
+    const expenseData = {
+      title,
+      amount: Number(amount),
+      category,
+      date,
+    };
 
-  title,
-
-  amount: Number(amount),
-
-  category,
-
-  date,
-};
-    // EDIT MODE
     if (
       editingExpense &&
       onUpdateExpense
@@ -106,22 +96,13 @@ const expenseData = {
       onUpdateExpense(
         expenseData
       );
-    }
-
-    // CREATE MODE
-    else {
-      onAddExpense(
-        expenseData
-      );
+    } else {
+      onAddExpense(expenseData);
     }
 
     resetForm();
-
     onClose();
   }
-
-  // HIDE MODAL
-  if (!open) return null;
 
   return (
     <div
@@ -144,8 +125,7 @@ const expenseData = {
         style={{
           width: "100%",
           maxWidth: "520px",
-          background:
-            "#ffffff",
+          background: "#ffffff",
           borderRadius: "28px",
           border:
             "1px solid #E5E7EB",
@@ -156,7 +136,6 @@ const expenseData = {
             "0 20px 60px rgba(0,0,0,0.12)",
         }}
       >
-        {/* HEADER */}
         <div
           style={{
             display: "flex",
@@ -196,9 +175,7 @@ const expenseData = {
           </div>
 
           <button
-            onClick={
-              handleClose
-            }
+            onClick={handleClose}
             style={{
               width: "42px",
               height: "42px",
@@ -224,11 +201,8 @@ const expenseData = {
           </button>
         </div>
 
-        {/* FORM */}
         <form
-          onSubmit={
-            handleSubmit
-          }
+          onSubmit={handleSubmit}
           style={{
             display: "flex",
             flexDirection:
@@ -236,13 +210,8 @@ const expenseData = {
             gap: "18px",
           }}
         >
-          {/* TITLE */}
           <div>
-            <label
-              style={
-                labelStyle
-              }
-            >
+            <label style={labelStyle}>
               Expense Title
             </label>
 
@@ -255,44 +224,30 @@ const expenseData = {
                   e.target.value
                 )
               }
-              style={
-                inputStyle
-              }
+              style={inputStyle}
             />
           </div>
 
-          {/* AMOUNT */}
           <div>
-            <label
-              style={
-                labelStyle
-              }
-            >
+            <label style={labelStyle}>
               Amount
             </label>
 
             <input
               type="number"
-              placeholder="₹0.00"
+              placeholder="Rs. 0.00"
               value={amount}
               onChange={(e) =>
                 setAmount(
                   e.target.value
                 )
               }
-              style={
-                inputStyle
-              }
+              style={inputStyle}
             />
           </div>
 
-          {/* CATEGORY */}
           <div>
-            <label
-              style={
-                labelStyle
-              }
-            >
+            <label style={labelStyle}>
               Category
             </label>
 
@@ -303,15 +258,11 @@ const expenseData = {
                   e.target.value
                 )
               }
-              style={
-                inputStyle
-              }
+              style={inputStyle}
             >
               {categories.map(
                 (cat) => (
-                  <option
-                    key={cat}
-                  >
+                  <option key={cat}>
                     {cat}
                   </option>
                 )
@@ -319,13 +270,8 @@ const expenseData = {
             </select>
           </div>
 
-          {/* DATE */}
           <div>
-            <label
-              style={
-                labelStyle
-              }
-            >
+            <label style={labelStyle}>
               Date
             </label>
 
@@ -337,13 +283,10 @@ const expenseData = {
                   e.target.value
                 )
               }
-              style={
-                inputStyle
-              }
+              style={inputStyle}
             />
           </div>
 
-          {/* BUTTONS */}
           <div
             style={{
               display: "flex",
@@ -355,9 +298,7 @@ const expenseData = {
           >
             <button
               type="button"
-              onClick={
-                handleClose
-              }
+              onClick={handleClose}
               style={{
                 height: "48px",
                 padding:
@@ -436,3 +377,22 @@ const labelStyle = {
   fontWeight: 600,
   color: "#111827",
 };
+
+function getInitialExpenseState(
+  editingExpense
+) {
+  return {
+    title:
+      editingExpense?.title ||
+      "",
+    amount:
+      editingExpense?.amount ||
+      "",
+    category:
+      editingExpense?.category ||
+      "Food",
+    date:
+      editingExpense?.date ||
+      "",
+  };
+}

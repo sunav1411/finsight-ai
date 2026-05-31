@@ -61,34 +61,27 @@ export default function Topbar({
     setShowNotifications,
   ] = useState(false);
 
-  const [today, setToday] =
-    useState("");
+  const [today] = useState(() =>
+    new Date().toLocaleDateString(
+      "en-IN",
+      {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }
+    )
+  );
 
-  const [greeting, setGreeting] =
-    useState("");
+  const [greeting] = useState(
+    () => getGreeting()
+  );
 
   const [user, setUser] =
     useState(null);
 
   // LOAD
   useEffect(() => {
-
-    setToday(
-      new Date().toLocaleDateString(
-        "en-IN",
-        {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }
-      )
-    );
-
-    setGreeting(
-      getGreeting()
-    );
-
     const unsubscribe =
       onAuthStateChanged(
         auth,

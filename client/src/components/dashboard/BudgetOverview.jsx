@@ -1,138 +1,60 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-} from "react";
-
+import { useState } from "react";
 import toast from "react-hot-toast";
-
 import { auth } from "@/lib/firebase";
-
-import {
-  saveUserBudget,
-} from "@/lib/firestore";
+import { saveUserBudget } from "@/lib/firestore";
 
 export default function BudgetOverview({
   expenses = [],
   budget = 0,
   setBudget = () => {},
 }) {
-
-  // SAFE BUDGET VALUE
   const safeBudget =
     Number(budget || 0);
 
-  // INPUT STATE
-  const [
-    budgetInput,
-    setBudgetInput,
-  ] = useState("");
+  const currentMonth =
+    new Date().getMonth();
 
-  // SYNC INPUT WITH LIVE BUDGET
-  useEffect(() => {
+  const currentYear =
+    new Date().getFullYear();
 
-    setBudgetInput(
-      safeBudget.toString()
+  const monthlyExpenses =
+    Array.isArray(expenses)
+      ? expenses.filter(
+          (expense) => {
+            if (!expense.date) {
+              return false;
+            }
+
+            const expenseDate =
+              new Date(
+                expense.date
+              );
+
+            return (
+              expenseDate.getMonth() ===
+                currentMonth &&
+              expenseDate.getFullYear() ===
+                currentYear
+            );
+          }
+        )
+      : [];
+
+  const totalSpent =
+    monthlyExpenses.reduce(
+      (sum, expense) =>
+        sum +
+        Number(
+          expense.amount || 0
+        ),
+      0
     );
 
-  }, [safeBudget]);
-
-  // SAVE / UPDATE BUDGET
-  async function handleSaveBudget() {
-
-    const parsedBudget =
-      Number(budgetInput);
-
-    if (
-      !parsedBudget ||
-      parsedBudget <= 0
-    ) {
-
-      toast.error(
-        "Enter valid budget"
-      );
-
-      return;
-    }
-
-    const user =
-      auth.currentUser;
-
-    if (!user) return;
-
-    try {
-
-      // SAVE TO FIRESTORE
-      await saveUserBudget(
-        user.uid,
-        parsedBudget
-      );
-
-      // UPDATE GLOBAL STATE
-      setBudget(parsedBudget);
-
-      toast.success(
-        safeBudget > 0
-          ? "Budget updated"
-          : "Budget saved"
-      );
-
-    } catch (error) {
-
-      toast.error(
-        "Failed to save budget"
-      );
-    }
-  }
-
-// TOTAL SPENT (CURRENT MONTH ONLY)
-
-const currentMonth =
-  new Date().getMonth();
-
-const currentYear =
-  new Date().getFullYear();
-
-const monthlyExpenses =
-  Array.isArray(expenses)
-    ? expenses.filter(
-        (expense) => {
-
-          if (!expense.date)
-            return false;
-
-          const expenseDate =
-            new Date(
-              expense.date
-            );
-
-          return (
-            expenseDate.getMonth() ===
-              currentMonth &&
-
-            expenseDate.getFullYear() ===
-              currentYear
-          );
-        }
-      )
-    : [];
-
-const totalSpent =
-  monthlyExpenses.reduce(
-    (sum, expense) =>
-      sum +
-      Number(
-        expense.amount || 0
-      ),
-    0
-  );
-
-  // REMAINING
   const remaining =
     safeBudget - totalSpent;
 
-  // PERCENTAGE
   const percentage =
     safeBudget > 0
       ? Math.min(
@@ -144,11 +66,77 @@ const totalSpent =
         )
       : 0;
 
-  // OVERSPENDING
   const isOverspending =
     totalSpent >
       safeBudget &&
     safeBudget > 0;
+
+  return (
+    <BudgetOverviewContent
+      key={safeBudget}
+      safeBudget={safeBudget}
+      setBudget={setBudget}
+      totalSpent={totalSpent}
+      remaining={remaining}
+      percentage={percentage}
+      isOverspending={isOverspending}
+    />
+  );
+}
+
+function BudgetOverviewContent({
+  safeBudget,
+  setBudget,
+  totalSpent,
+  remaining,
+  percentage,
+  isOverspending,
+}) {
+  const [
+    budgetInput,
+    setBudgetInput,
+  ] = useState(
+    safeBudget.toString()
+  );
+
+  async function handleSaveBudget() {
+    const parsedBudget =
+      Number(budgetInput);
+
+    if (
+      !parsedBudget ||
+      parsedBudget <= 0
+    ) {
+      toast.error(
+        "Enter valid budget"
+      );
+      return;
+    }
+
+    const user =
+      auth.currentUser;
+
+    if (!user) return;
+
+    try {
+      await saveUserBudget(
+        user.uid,
+        parsedBudget
+      );
+
+      setBudget(parsedBudget);
+
+      toast.success(
+        safeBudget > 0
+          ? "Budget updated"
+          : "Budget saved"
+      );
+    } catch (error) {
+      toast.error(
+        "Failed to save budget"
+      );
+    }
+  }
 
   return (
     <div
@@ -163,14 +151,11 @@ const totalSpent =
           "0 10px 25px rgba(0,0,0,0.25)",
       }}
     >
-
-      {/* HEADER */}
       <div
         style={{
           marginBottom: "28px",
         }}
       >
-
         <p
           style={{
             fontSize: "12px",
@@ -215,10 +200,8 @@ const totalSpent =
           discipline using realtime
           budget analytics.
         </p>
-
       </div>
 
-      {/* INPUT SECTION */}
       <div
         style={{
           display: "flex",
@@ -228,42 +211,29 @@ const totalSpent =
           flexWrap: "wrap",
         }}
       >
-
         <input
           type="number"
-
           placeholder={
             safeBudget > 0
-              ? `Current Budget: ₹${safeBudget.toLocaleString()}`
+              ? `Current Budget: Rs. ${safeBudget.toLocaleString()}`
               : "Set monthly budget"
           }
-
           value={budgetInput}
-
           onChange={(e) =>
             setBudgetInput(
               e.target.value
             )
           }
-
           style={{
             width: "320px",
-
             height: "54px",
-
             borderRadius: "16px",
-
             border:
               "1px solid #E5E7EB",
-
             padding: "0 18px",
-
             fontSize: "16px",
-
             outline: "none",
-
             color: "#111827",
-
             background:
               "#ffffff",
           }}
@@ -271,86 +241,59 @@ const totalSpent =
 
         <button
           onClick={handleSaveBudget}
-
           style={{
             height: "54px",
-
             minWidth: "220px",
-
             padding: "0 28px",
-
             borderRadius: "16px",
-
             border: "none",
-
             background: "#16A34A",
-
             color: "#243B53",
-
             fontWeight: 600,
-
             fontSize: "15px",
-
             cursor: "pointer",
-
             whiteSpace:
               "nowrap",
           }}
         >
-
           {safeBudget > 0
             ? "Update Budget"
             : "Save Budget"}
-
         </button>
-
       </div>
 
-      {/* STATS */}
       <div
         style={{
           display: "grid",
-
           gridTemplateColumns:
             "repeat(auto-fit, minmax(140px, 1fr))",
-
           gap: "16px",
-
           marginBottom: "28px",
         }}
       >
-
-        {/* BUDGET */}
         <div style={cardStyle}>
-
           <p style={labelStyle}>
             Budget
           </p>
 
           <h3 style={valueStyle}>
-            ₹
+            Rs.{" "}
             {safeBudget.toLocaleString()}
           </h3>
-
         </div>
 
-        {/* SPENT */}
         <div style={cardStyle}>
-
           <p style={labelStyle}>
             Spent
           </p>
 
           <h3 style={valueStyle}>
-            ₹
+            Rs.{" "}
             {totalSpent.toLocaleString()}
           </h3>
-
         </div>
 
-        {/* REMAINING */}
         <div style={cardStyle}>
-
           <p style={labelStyle}>
             Remaining
           </p>
@@ -358,41 +301,31 @@ const totalSpent =
           <h3
             style={{
               ...valueStyle,
-
               color:
                 remaining < 0
                   ? "#DC2626"
                   : "#16A34A",
             }}
           >
-            ₹
+            Rs.{" "}
             {remaining.toLocaleString()}
           </h3>
-
         </div>
-
       </div>
 
-      {/* PROGRESS */}
       <div>
-
         <div
           style={{
             display: "flex",
-
             justifyContent:
               "space-between",
-
             marginBottom: "10px",
           }}
         >
-
           <span
             style={{
               fontSize: "14px",
-
               fontWeight: 600,
-
               color: "#c5ee11",
             }}
           >
@@ -402,83 +335,57 @@ const totalSpent =
           <span
             style={{
               fontSize: "14px",
-
               fontWeight: 600,
-
               color:
                 isOverspending
                   ? "#DC2626"
                   : "#16A34A",
             }}
           >
-
-            {percentage.toFixed(
-              0
-            )}
-            %
-
+            {percentage.toFixed(0)}%
           </span>
-
         </div>
 
-        {/* BAR */}
         <div
           style={{
             width: "100%",
-
             height: "14px",
-
             background:
               "#334155",
-
             borderRadius:
               "999px",
-
             overflow: "hidden",
           }}
         >
-
           <div
             style={{
               width: `${percentage}%`,
-
               height: "100%",
-
               background:
                 isOverspending
                   ? "#DC2626"
                   : "#16A34A",
-
               borderRadius:
                 "999px",
-
               transition:
                 "0.3s ease",
             }}
           />
-
         </div>
 
-        {/* WARNING */}
         {isOverspending && (
-
           <p
             style={{
               marginTop: "14px",
-
               color: "#DC2626",
-
               fontSize: "14px",
-
               fontWeight: 600,
             }}
           >
             You have exceeded your
             monthly budget.
           </p>
-
         )}
-
       </div>
     </div>
   );

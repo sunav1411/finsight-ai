@@ -16,21 +16,20 @@ export function ThemeProvider({
 
   const [darkMode,
     setDarkMode] =
-    useState(false);
+    useState(() => {
+      if (
+        typeof window ===
+        "undefined"
+      ) {
+        return false;
+      }
 
-  useEffect(() => {
-
-    const saved =
-      localStorage.getItem(
-        "darkMode"
+      return (
+        localStorage.getItem(
+          "darkMode"
+        ) === "true"
       );
-
-    if (saved === "true") {
-
-      setDarkMode(true);
-    }
-
-  }, []);
+    });
 
   useEffect(() => {
 
